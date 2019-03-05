@@ -13,13 +13,25 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Button GravityButton = (Button)findViewById(R.id.Gravity);
+        Button Gyroscope = (Button)findViewById(R.id.Gyroscope) ;
         GravityButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
                 Intent i  = new Intent(MainActivity.this, GravityActivity.class);
-                Bundle b = new Bundle();
-                b.putInt("command", 0);
-                i.putExtras(b);
+//                Bundle b = new Bundle();
+//                b.putInt("command", 0);
+//                i.putExtras(b);
+                startActivity(i);
+
+            }
+        });
+        Gyroscope.setOnClickListener( new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                Intent i  = new Intent(MainActivity.this, GyroscopeActivity.class);
+//                Bundle b = new Bundle();
+//                b.putInt("command", 0);
+//                i.putExtras(b);
                 startActivity(i);
 
             }

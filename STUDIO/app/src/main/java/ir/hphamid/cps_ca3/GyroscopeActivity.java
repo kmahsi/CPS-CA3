@@ -28,7 +28,7 @@ import static java.lang.StrictMath.abs;
  * Created by kamran on 3/4/2019.
  */
 
-public class GravityActivity extends AppCompatActivity implements SensorEventListener{
+public class GyroscopeActivity extends AppCompatActivity implements SensorEventListener{
     private boolean started = false;
     private Sensor sensor;
     private long last_event_time = 0;
@@ -72,7 +72,7 @@ public class GravityActivity extends AppCompatActivity implements SensorEventLis
         Point size = new Point();
         Display display = getWindowManager().getDefaultDisplay();
         display.getSize(size);
-        xMax = (float) size.x - 300;
+        xMax = (float) size.x - 100;
         yMax = (float) size.y - 400;
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -80,7 +80,7 @@ public class GravityActivity extends AppCompatActivity implements SensorEventLis
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (started != true){
+        if (!started){
             yPos = yMax / 2;
             xPos = xMax / 2;
             started = true;

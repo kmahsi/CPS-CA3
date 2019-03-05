@@ -19,6 +19,10 @@
         <activity android:name=".GravityActivity">
 
         </activity>
+
+        <activity android:name=".GyroscopeActivity">
+
+        </activity>
     </application>
 
 </manifest>
