@@ -90,7 +90,7 @@ public class GravityActivity extends AppCompatActivity implements SensorEventLis
     protected void onStart() {
         super.onStart();
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY),
-                SensorManager.SENSOR_DELAY_FASTEST);
+                SensorManager.SENSOR_DELAY_GAME);
     }
 
     @Override
@@ -104,18 +104,21 @@ public class GravityActivity extends AppCompatActivity implements SensorEventLis
     public void onSensorChanged(SensorEvent sensorEvent) {
         if (!started)
             return;
-        xAccel = sensorEvent.values[0];
-        yAccel = -sensorEvent.values[1];
-        zAccel = -sensorEvent.values[2];
-        if (abs(xAccel*m) < abs(zAccel*m*us) && xVel == 0)
-            xAccel = 0;
-        else
-            xAccel -= zAccel*uk;
-        if (abs(yAccel*m) < abs(zAccel*m*us) && yVel == 0)
-            yAccel = 0;
-        else
-            yAccel -= zAccel*uk;
-        updateBall();
+        if (sensorEvent.sensor.getType() == Sensor.TYPE_GRAVITY) {
+
+            xAccel = sensorEvent.values[0];
+            yAccel = -sensorEvent.values[1];
+            zAccel = -sensorEvent.values[2];
+            if (abs(xAccel * m) < abs(zAccel * m * us) && xVel == 0)
+                xAccel = 0;
+            else
+                xAccel -= zAccel * uk;
+            if (abs(yAccel * m) < abs(zAccel * m * us) && yVel == 0)
+                yAccel = 0;
+            else
+                yAccel -= zAccel * uk;
+            updateBall();
+        }
     }
 
     private void updateBall() {

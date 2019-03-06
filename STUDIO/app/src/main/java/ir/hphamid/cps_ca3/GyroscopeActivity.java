@@ -2,7 +2,6 @@ package ir.hphamid.cps_ca3;
 
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,32 +11,35 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.hardware.TriggerEvent;
-import android.hardware.TriggerEventListener;
-import android.icu.util.BuddhistCalendar;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
 import static java.lang.StrictMath.abs;
 
 public class GyroscopeActivity extends AppCompatActivity implements SensorEventListener{
     private boolean started = false;
     private Sensor sensor;
     private long last_event_time = 0;
-    private double xPos, xAccel, xVel = 0.0f;
-    private double yPos, yAccel, yVel = 0.0f;
+    private double xPos, xw, xVel = 0.0f;
+    private double yPos, yw, yVel = 0.0f;
     private double xMax, yMax;
     private Bitmap ball;
     private SensorManager sensorManager;
     private int m = 10;
     private double us = 0.15;
     private double uk = 0.10;
-    private float zAccel = 0.0f;
-
+    private double zw = 0.0f;
+    private float currentxDegree = 0;
+    private float currentyDegree = 0;
+    private float currentzDegree = 0;
+    private double G = 9.8;
 
     private class BallView extends View {
 
@@ -89,7 +91,7 @@ public class GyroscopeActivity extends AppCompatActivity implements SensorEventL
     @Override
     protected void onStart() {
         super.onStart();
-        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY), SensorManager.SENSOR_DELAY_FASTEST);
+        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
 
     }
 
@@ -102,28 +104,49 @@ public class GyroscopeActivity extends AppCompatActivity implements SensorEventL
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
+        float frameTime = .266f;
         if (!started)
             return;
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_GRAVITY) {
-            xAccel = sensorEvent.values[0];
-            yAccel = -sensorEvent.values[1];
-            zAccel = -sensorEvent.values[2];
-            if (abs(xAccel*m) < abs(zAccel*m*us) && xVel == 0)
-                xAccel = 0;
+        if (sensorEvent.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+            zw = sensorEvent.values[2];
+            yw = -sensorEvent.values[0];
+            xw = -sensorEvent.values[1];
+
+            currentxDegree += xw * frameTime;
+            currentyDegree += yw * frameTime;
+            currentzDegree += zw * frameTime;
+//
+//            LinearLayout lView = new LinearLayout(this);
+//            TextView mytext = new TextView(this);
+//            mytext.setText(String.valueOf(currentxDegree) + '\n' + String.valueOf(currentyDegree) + '\n' + String.valueOf(currentzDegree));
+//            lView.addView(mytext);
+//            setContentView(lView);
+
+            xw = sin(currentxDegree) * G;
+            yw = sin(currentyDegree) * G;
+            zw = cos(currentzDegree) * G;
+
+//            System.out.println(currentxDegree);
+//            System.out.println(currentyDegree);
+//            System.out.println(currentzDegree);
+
+
+            if (abs(xw*m) < abs(zw *m*us) && xVel == 0)
+                xw = 0;
             else
-                xAccel = xAccel*uk;
-            if (abs(yAccel*m) < abs(zAccel*m*us) && yVel == 0)
-                yAccel = 0;
+                xw -= zw*uk;
+            if (abs(yw*m) < abs(zw *m*us) && yVel == 0)
+                yw = 0;
             else
-                yAccel = yAccel*uk;
+                yw -= zw*uk;
             updateBall();
         }
     }
 
     private void updateBall() {
         float frameTime = .266f;
-        xVel += (xAccel * frameTime);
-        yVel += (yAccel * frameTime);
+        xVel += (xw * frameTime);
+        yVel += (yw * frameTime);
 
         double xS = (xVel / 2) * frameTime;
         double yS = (yVel / 2) * frameTime;
