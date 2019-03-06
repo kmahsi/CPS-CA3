@@ -24,10 +24,6 @@ import android.widget.ImageView;
 
 import static java.lang.StrictMath.abs;
 
-/**
- * Created by kamran on 3/4/2019.
- */
-
 public class GravityActivity extends AppCompatActivity implements SensorEventListener{
     private boolean started = false;
     private Sensor sensor;
@@ -93,8 +89,8 @@ public class GravityActivity extends AppCompatActivity implements SensorEventLis
     @Override
     protected void onStart() {
         super.onStart();
-        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY), SensorManager.SENSOR_DELAY_FASTEST);
-
+        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY),
+                SensorManager.SENSOR_DELAY_FASTEST);
     }
 
     @Override
@@ -108,20 +104,18 @@ public class GravityActivity extends AppCompatActivity implements SensorEventLis
     public void onSensorChanged(SensorEvent sensorEvent) {
         if (!started)
             return;
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_GRAVITY) {
-            xAccel = sensorEvent.values[0];
-            yAccel = -sensorEvent.values[1];
-            zAccel = -sensorEvent.values[2];
-            if (abs(xAccel*m) < abs(zAccel*m*us) && xVel == 0)
-                xAccel = 0;
-            else
-                xAccel = xAccel*uk;
-            if (abs(yAccel*m) < abs(zAccel*m*us) && yVel == 0)
-                yAccel = 0;
-            else
-                yAccel = yAccel*uk;
-            updateBall();
-        }
+        xAccel = sensorEvent.values[0];
+        yAccel = -sensorEvent.values[1];
+        zAccel = -sensorEvent.values[2];
+        if (abs(xAccel*m) < abs(zAccel*m*us) && xVel == 0)
+            xAccel = 0;
+        else
+            xAccel -= zAccel*uk;
+        if (abs(yAccel*m) < abs(zAccel*m*us) && yVel == 0)
+            yAccel = 0;
+        else
+            yAccel -= zAccel*uk;
+        updateBall();
     }
 
     private void updateBall() {

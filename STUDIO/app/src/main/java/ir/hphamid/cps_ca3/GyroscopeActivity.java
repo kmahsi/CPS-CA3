@@ -24,10 +24,6 @@ import android.widget.ImageView;
 
 import static java.lang.StrictMath.abs;
 
-/**
- * Created by kamran on 3/4/2019.
- */
-
 public class GyroscopeActivity extends AppCompatActivity implements SensorEventListener{
     private boolean started = false;
     private Sensor sensor;
