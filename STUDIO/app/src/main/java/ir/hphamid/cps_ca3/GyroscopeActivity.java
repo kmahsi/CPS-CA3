@@ -91,7 +91,7 @@ public class GyroscopeActivity extends AppCompatActivity implements SensorEventL
     @Override
     protected void onStart() {
         super.onStart();
-        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_UI);
 
     }
 
@@ -115,7 +115,7 @@ public class GyroscopeActivity extends AppCompatActivity implements SensorEventL
             currentxDegree += xw * frameTime;
             currentyDegree += yw * frameTime;
             currentzDegree += zw * frameTime;
-//
+////
 //            LinearLayout lView = new LinearLayout(this);
 //            TextView mytext = new TextView(this);
 //            mytext.setText(String.valueOf(currentxDegree) + '\n' + String.valueOf(currentyDegree) + '\n' + String.valueOf(currentzDegree));
@@ -126,19 +126,30 @@ public class GyroscopeActivity extends AppCompatActivity implements SensorEventL
             yw = sin(currentyDegree) * G;
             zw = cos(currentzDegree) * G;
 
-//            System.out.println(currentxDegree);
-//            System.out.println(currentyDegree);
-//            System.out.println(currentzDegree);
+
+//            LinearLayout lView = new LinearLayout(this);
+//            TextView mytext = new TextView(this);
+//            mytext.setText(String.valueOf(xw) + '\n' + String.valueOf(yw) + '\n' + String.valueOf(zw));
+//            lView.addView(mytext);
+//            setContentView(lView);
 
 
-            if (abs(xw*m) < abs(zw *m*us) && xVel == 0)
+            if (abs(xw) < abs(zw * us) && xVel == 0)
                 xw = 0;
             else
-                xw -= zw*uk;
-            if (abs(yw*m) < abs(zw *m*us) && yVel == 0)
+                    xw += zw * uk;
+
+            if (abs(yw) < abs(zw * us) && yVel == 0)
                 yw = 0;
             else
-                yw -= zw*uk;
+                    yw += zw * uk;
+
+            LinearLayout lView = new LinearLayout(this);
+            TextView mytext = new TextView(this);
+            mytext.setText(String.valueOf(xw) + '\n' + String.valueOf(yw) + '\n' + String.valueOf(zw));
+            lView.addView(mytext);
+            setContentView(lView);
+
             updateBall();
         }
     }
@@ -156,14 +167,18 @@ public class GyroscopeActivity extends AppCompatActivity implements SensorEventL
 
         if (xPos > xMax) {
             xPos = xMax;
+            xVel = 0;
         } else if (xPos < 0) {
             xPos = 0;
+            xVel = 0;
         }
 
         if (yPos > yMax) {
             yPos = yMax;
+            yVel = 0;
         } else if (yPos < 0) {
             yPos = 0;
+            yVel = 0;
         }
     }
 
