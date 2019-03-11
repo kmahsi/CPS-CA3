@@ -13,29 +13,35 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import static java.lang.Math.atan;
 import static java.lang.Math.cos;
+import static java.lang.Math.pow;
 import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
 import static java.lang.StrictMath.abs;
 
 public class GyroscopeActivity extends AppCompatActivity implements SensorEventListener{
     private boolean started = false;
     private Sensor sensor;
     private long last_event_time = 0;
-    private double xPos, xw, xVel = 0.0f;
-    private double yPos, yw, yVel = 0.0f;
+    private double xPos, xw, aX, fX, xVel = 0.0f;
+    private double yPos, yw, aY, fY, yVel = 0.0f;
     private double xMax, yMax;
+    private double aTotal, fTotal;
     private Bitmap ball;
     private SensorManager sensorManager;
     private int m = 10;
     private double us = 0.15;
     private double uk = 0.10;
-    private double zw = 0.0f;
+    private double aZ, zw = 0.0f;
+    private double arcTanTetha;
     private float currentxDegree = 0;
     private float currentyDegree = 0;
     private float currentzDegree = 0;
@@ -105,6 +111,7 @@ public class GyroscopeActivity extends AppCompatActivity implements SensorEventL
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         float frameTime = .266f;
+        float freakF,freakFx,freakFy, theta;
         if (!started)
             return;
         if (sensorEvent.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
@@ -122,10 +129,11 @@ public class GyroscopeActivity extends AppCompatActivity implements SensorEventL
 //            lView.addView(mytext);
 //            setContentView(lView);
 
-            xw = sin(currentxDegree) * G;
-            yw = sin(currentyDegree) * G;
-            zw = cos(currentzDegree) * G;
-
+            aX = sin(currentxDegree) * G;
+            aY = sin(currentyDegree) * G;
+            aZ = cos(currentzDegree) * G;
+            fX = m*aX;
+            fY = m*aY;
 
 //            LinearLayout lView = new LinearLayout(this);
 //            TextView mytext = new TextView(this);
@@ -133,22 +141,44 @@ public class GyroscopeActivity extends AppCompatActivity implements SensorEventL
 //            lView.addView(mytext);
 //            setContentView(lView);
 
+            freakF = (float) (m * aZ * uk);
+            if (xVel == 0)
+                if (yVel > 0)
+                    theta = 90;
+                else
+                    theta = -90;
+            else {
+                theta = (float) atan(yVel / xVel);
+                if (xVel > 0)
+                    theta += 180;
+            }
+            freakFx = (float) (freakF * cos(theta));
+            freakFy = (float) (freakF * sin(theta));
+            Log.w(".","\ntheta: "+ String.valueOf(theta));
+            fY += freakFy;
+            fX += freakFx;
 
-            if (abs(xw) < abs(zw * us) && xVel == 0)
-                xw = 0;
+
+            if (abs(aX) < abs(aZ * us) && xVel == 0) {
+                aX = 0;
+
+            }
             else
-                    xw += zw * uk;
-
-            if (abs(yw) < abs(zw * us) && yVel == 0)
-                yw = 0;
+                aX = fX / m;
+            if (abs(aY) < abs(aZ * us) && yVel == 0)
+                aY = 0;
             else
-                    yw += zw * uk;
+                aY = fY / m;
 
-            LinearLayout lView = new LinearLayout(this);
-            TextView mytext = new TextView(this);
-            mytext.setText(String.valueOf(xw) + '\n' + String.valueOf(yw) + '\n' + String.valueOf(zw));
-            lView.addView(mytext);
-            setContentView(lView);
+//            LinearLayout lView = new LinearLayout(this);
+//            TextView mytext = new TextView(this);
+//            mytext.setText(String.valueOf(xPos) + '\n' + String.valueOf(yPos) + '\n' + String.valueOf(xVel) + '\n' + String.valueOf(yVel) + '\n' + String.valueOf(aX) + '\n' + String.valueOf(aY));
+//            lView.addView(mytext);
+//            setContentView(lView);
+
+//            Log.w("xPos", String.valueOf(xPos));
+//            Log.w("yPos", String.valueOf(yPos));
+            Log.w(".","\nxPos: "+ String.valueOf((int)xPos) + "---yPos: " + String.valueOf((int)yPos) + "---xVel: " + String.valueOf((int)xVel) + "---yVel: " + String.valueOf((int)yVel) + "---aX: " + String.valueOf((int)aX) + "---aY: " + String.valueOf((int)aY));
 
             updateBall();
         }
@@ -156,8 +186,8 @@ public class GyroscopeActivity extends AppCompatActivity implements SensorEventL
 
     private void updateBall() {
         float frameTime = .266f;
-        xVel += (xw * frameTime);
-        yVel += (yw * frameTime);
+        xVel += (aX * frameTime);
+        yVel += (aY * frameTime);
 
         double xS = (xVel / 2) * frameTime;
         double yS = (yVel / 2) * frameTime;
@@ -167,18 +197,29 @@ public class GyroscopeActivity extends AppCompatActivity implements SensorEventL
 
         if (xPos > xMax) {
             xPos = xMax;
-            xVel = 0;
+//            xVel = 0;
+//            aX = 0;
+            xVel = -xVel*0.7;
+//            aX = -aX*0.7;
         } else if (xPos < 0) {
             xPos = 0;
-            xVel = 0;
+//            xVel = 0;
+//            aX = 0;
+            xVel = -xVel*0.7;
+//            aX = -aX*0.7;
         }
 
         if (yPos > yMax) {
             yPos = yMax;
-            yVel = 0;
+            yVel = -yVel*0.7;
+//            aY = -aY*0.7;
+//            yVel = 0;2
         } else if (yPos < 0) {
             yPos = 0;
-            yVel = 0;
+//            yVel = 0;
+//            aY = 0;
+            yVel = -yVel*0.7;
+//            aY = -aY*0.7;
         }
     }
 

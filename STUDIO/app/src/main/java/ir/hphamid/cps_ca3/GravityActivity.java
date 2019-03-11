@@ -37,6 +37,7 @@ public class GravityActivity extends AppCompatActivity implements SensorEventLis
     private double us = 0.15;
     private double uk = 0.10;
     private float zAccel = 0.0f;
+    private double bounceOffTreshould = .8;
 
 
     private class BallView extends View {
@@ -68,7 +69,7 @@ public class GravityActivity extends AppCompatActivity implements SensorEventLis
         Point size = new Point();
         Display display = getWindowManager().getDefaultDisplay();
         display.getSize(size);
-        xMax = (float) size.x - 300;
+        xMax = (float) size.x - 100;
         yMax = (float) size.y - 400;
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -134,18 +135,18 @@ public class GravityActivity extends AppCompatActivity implements SensorEventLis
 
         if (xPos > xMax) {
             xPos = xMax;
-            xVel = 0;
+            xVel = -xVel * bounceOffTreshould;
         } else if (xPos < 0) {
             xPos = 0;
-            xVel = 0;
+            xVel = -xVel * bounceOffTreshould;
         }
 
         if (yPos > yMax) {
             yPos = yMax;
-            yVel = 0;
+            yVel = -yVel * bounceOffTreshould;
         } else if (yPos < 0) {
             yPos = 0;
-            yVel = 0;
+            yVel = -yVel * bounceOffTreshould;
         }
     }
 
